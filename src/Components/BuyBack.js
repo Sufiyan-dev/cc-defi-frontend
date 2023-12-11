@@ -1,20 +1,68 @@
 import React, { useState, useEffect } from "react";
 import "./BuyBack.css";
 import axios from "axios";
+import Web3 from "web3";
+
 const BuyBack = ({ connectedAccount }) => {
   const [selectedToken, setSelectedToken] = useState();
-  const [qouted, setQouted] = useState(false);
+  const [selectedTokenBalance, setSelectedTokenBalance] = useState();
+  const [qouted, setQouted] = useState(0);
+  const [tokenOutAmount, setTokenOutAmount] = useState(0);
+
   const [error, setError] = useState("");
   const [tokens, setTokens] = useState([]);
   const [protocoToken, setProtocolToken] = useState(0.0);
-  const handleOnSubmit = (e) => {
-    e.preventDefault();
-    console.log(selectedToken);
-  };
 
   const handleOnChange = (e) => {
     setSelectedToken(e.target.value);
   };
+
+  const getTransactionObject = async () => {
+    const result = await axios.post(
+      `https://defi-openswap-backend.vercel.app/transaction/approve`,
+      {
+        address: connectedAccount,
+        contractAddress: "0x39A4269650B394159Ac6147e48A88f5345316FB1",
+        amount: protocoToken,
+      }
+    );
+    const transactionResult = await window.ethereum.request({
+      method: "eth_sendTransaction",
+      params: [result.data],
+    });
+    console.log("transactionResult", transactionResult);
+    setQouted(2);
+  };
+
+  const getQuote = async () => {
+    const result = await axios.post(
+      `https://defi-openswap-backend.vercel.app/transaction/get-quote`,
+      {
+        tokenIn: "0x39A4269650B394159Ac6147e48A88f5345316FB1",
+        tokenOut: selectedToken,
+        amount: protocoToken,
+      }
+    );
+    console.log("result quote ", result);
+    let quoteAmountOut = Number(result.data.amountOut).toFixed(2);
+
+    setTokenOutAmount(quoteAmountOut);
+  };
+
+  useEffect(() => {
+    const userBalance = async () => {
+      if (connectedAccount) {
+        const result = await axios.get(
+          `https://defi-openswap-backend.vercel.app/wallet/get-balance/${connectedAccount}/${selectedToken}`
+        );
+        setSelectedTokenBalance(result.data.balance);
+      }
+    };
+    if (selectedToken) {
+      console.log("selectedToken", selectedToken);
+      userBalance();
+    }
+  }, [selectedToken]);
 
   useEffect(() => {
     const fetchtokens = async () => {
@@ -39,6 +87,33 @@ const BuyBack = ({ connectedAccount }) => {
     fetchtokens();
     protocolBalance();
   }, []);
+  const buyBackNow = async () => {
+    const result = await axios.post(
+      `https://defi-openswap-backend.vercel.app/transaction/buyback`,
+      {
+        tokenAddress: selectedToken,
+        amountMin: 0,
+        userAddress: connectedAccount,
+      }
+    );
+    const transactionResult = await window.ethereum.request({
+      method: "eth_sendTransaction",
+      params: [result.data],
+    });
+    console.log("transactionResult", transactionResult);
+  };
+  const handleOnSubmit = async (e) => {
+    e.preventDefault();
+    console.log(selectedToken);
+    if (qouted === 0) {
+      await getQuote();
+      setQouted(1);
+    } else if (qouted === 1) {
+      await getTransactionObject();
+    } else {
+      await buyBackNow();
+    }
+  };
 
   return (
     <div className="buyback-main">
@@ -54,9 +129,18 @@ const BuyBack = ({ connectedAccount }) => {
                 </option>
               ))}
             </select>
-            Available OpenSwap Tokens for exchange {protocoToken}
+            Available Selected Token's Balance{" "}
+            {parseInt(selectedTokenBalance).toFixed(2)} <br></br>
+            <br></br>
+            Available OpenSwap Tokens for exchange{" "}
+            {parseInt(protocoToken).toFixed(2)}
+            <br></br>
+            <br></br>
+            You will receive {parseInt(tokenOutAmount).toFixed(2)}
             <button className="buyback-btn" type="submit">
-              {qouted ? "Buy" : "Quote"}
+              {qouted === 0 && "Quote"}
+              {qouted === 1 && "Approve"}
+              {qouted === 2 && "Withdraw"}
             </button>
           </div>
         </form>
