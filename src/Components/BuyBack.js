@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import "./BuyBack.css";
 import axios from "axios";
 import Web3 from "web3";
+import { waitForTransactionConfirmation } from "../Utils/waitForTxn";
 
 const BuyBack = ({ connectedAccount }) => {
   const [selectedToken, setSelectedToken] = useState();
@@ -31,6 +32,7 @@ const BuyBack = ({ connectedAccount }) => {
       params: [result.data],
     });
     console.log("transactionResult", transactionResult);
+    const waitTxn = await waitForTransactionConfirmation(transactionResult);
     setQouted(2);
   };
 
@@ -101,6 +103,7 @@ const BuyBack = ({ connectedAccount }) => {
       params: [result.data],
     });
     console.log("transactionResult", transactionResult);
+    const waitTxn = await waitForTransactionConfirmation(transactionResult);
   };
   const handleOnSubmit = async (e) => {
     e.preventDefault();
