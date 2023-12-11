@@ -2,11 +2,14 @@
 
 .addliquidity-main {
   display: flex;
-  justify-content: space-around;
-  padding: 20px;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 50px;
+   
 }
 
 .addliquidty-wrapper {
+  margin-bottom: 50px;
   background-color: #f9f9f9;
   border: 1px solid #e0e0e0;
   border-radius: 8px;
@@ -71,7 +74,7 @@ button.submit-btn:hover {
   border-radius: 8px;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
   padding: 30px;
-  width: 60%;
+  width: 45%;
 }
 
 .histroy-title {
@@ -83,12 +86,17 @@ button.submit-btn:hover {
 }
 
 .history-search {
-  margin-bottom: 15px;
+  display: flex;
+  justify-content: end;
+  margin-right: 20px;
+  margin-bottom: 0;
 }
 
 .history-search input {
-  width: 100%;
-  padding: 12px;
+  margin-top: 25px;
+  margin-bottom: 0;
+  width: 40.5%;
+  padding: 14px;
   font-size: 16px;
   border: 1px solid #ddd;
   border-radius: 5px;
@@ -104,14 +112,14 @@ button.submit-btn:hover {
   border-collapse: collapse;
 }
 
-.histroy-table table th,
+.histroy-table table thead,
 .histroy-table table td {
   border: 1px solid #ddd;
-  padding: 14px;
+  padding: 10px;
   text-align: left;
 }
 
-.histroy-table table th {
+.histroy-table table thead {
   background-color: #f2f2f2;
-  font-weight: bold;
+  font-weight: 700;
 }
