@@ -14,7 +14,7 @@ import AddLiquidity from "./Components/AddLiquidity";
 import BuyBack from "./Components/BuyBack";
 
 function App() {
-  const [connectedAccount, setConnectedAccount] = useState(null);
+  const [connectedAccount, setConnectedAccount] = useState("");
   const [accountBalance, setAccountBalance] = useState(0);
 
   useEffect(() => {
