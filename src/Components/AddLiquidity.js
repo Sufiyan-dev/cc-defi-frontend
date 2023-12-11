@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import "./AddLiquidity.css";
+import axios from "axios";
 
 const tokenSample = [
   { token: "0xbkbkjbjkjk", tokenName: "ETH", tokenBalance: 10 ** 18 },
@@ -13,10 +14,10 @@ const sampleData = [
   { token: "ETH", amount: 500, timestamp: 12345456 },
 ];
 
-const AddLiquidity = () => {
+const AddLiquidity = ({connectedAccount}) => {
   const [tokenInfo, setTokenInfo] = useState(tokenSample);
-  const [userHistory, setUserHistory] = useState(sampleData);
-  const [filterData, setFilterData] = useState(sampleData);
+  const [userHistory, setUserHistory] = useState([]);
+  const [filterData, setFilterData] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [tokenSelected, setTokenSelected] = useState(tokenInfo[0].token);
   const [supplyAmount, setSupplyAmount] = useState(0);
@@ -31,6 +32,21 @@ const AddLiquidity = () => {
       setFilterData(userHistory);
     }
   }, [searchTerm]);
+
+  useEffect(() => {
+    const getUsersHistory = async () => {
+      if(connectedAccount.length > 0){
+        const result = await axios.post(`https://defi-openswap-backend.vercel.app/token/userSupplyHistory`,{
+          "userAddress": connectedAccount
+        })
+        console.log("history ",result);
+
+        setUserHistory(result.data.result);
+        setFilterData(result.data.result)
+      }
+    }
+    getUsersHistory();
+  },[connectedAccount])
 
   const handleSearchTermChange = (event) => {
     setSearchTerm(event.target.value);
@@ -101,7 +117,7 @@ const AddLiquidity = () => {
               {filterData.length > 0 ? (
                 filterData.map((item, i) => (
                   <tr key={i}>
-                    <td>{item.token}</td>
+                    <td>{item.symbol}</td>
                     <td>{item.amount}</td>
                     <td>{item.timestamp}</td>
                   </tr>

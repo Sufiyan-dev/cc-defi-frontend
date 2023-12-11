@@ -141,7 +141,7 @@ const Swap = ({connectedAccount}) => {
 
   const handleGetQoute = () => {
     setQouted(true);
-    setTokenOutAmount(10000);
+    // setTokenOutAmount(0);
   };
 
   const handleOnChangeTokenIn = (e) => {
