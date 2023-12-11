@@ -1,5 +1,6 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import "./Swap.css"
+import axios from 'axios';
 
 const tokenSample = [
     { token: "0xbkbkjbjkjk", tokenName: "ETH", tokenBalance: 10 ** 18 },
@@ -8,13 +9,40 @@ const tokenSample = [
 ]
 
 const Swap = () => {
-    const [tokens, setTokens] = useState(tokenSample);
-    const [tokenIn, setTokenIn] = useState(tokenSample[0].token);
+    const [tokens, setTokens] = useState([]);
+    const [tokenIn, setTokenIn] = useState("");
     const [tokenInAmount, setTokenInAmount] = useState(0);
-    const [tokenOut, setTokenOut] = useState(tokenSample[0].token);
+    const [tokenOut, setTokenOut] = useState("");
     const [tokenOutAmount, setTokenOutAmount] = useState(0);
     const [qouted, setQouted] = useState(false);
     const [slippage, setSlippage] = useState(0.3);
+
+    useEffect(() => {
+        const fetchtokens = async () => {
+            const result = await axios.post(`http://localhost:4000/token/tokenInfo`);
+            console.log("result ",result)
+
+            if(!result.data){
+                return alert("falied to fetch tokens info")
+            }
+
+            setTokens(result.data.result.tokenPools)
+        }
+        fetchtokens()
+    },[])
+
+    useEffect(() => {
+        const getQuote = async () => {
+            const result = await axios.post(`http://localhost:4000/transaction/get-quote`,{
+                    "tokenIn": "0xddbc53b118098e3be3f701d243b7602673005d87",
+                    "tokenOut": "0xdb8556680c1a3b66124cf5c87bd9e61804f1e367",
+                    "amount": 50000
+            });
+            console.log("result quote ", result)
+        }
+
+        getQuote()
+    },[qouted])
 
     const handleOnSubmitForm = (e) => {
         e.preventDefault();
@@ -34,6 +62,7 @@ const Swap = () => {
 
     const handleGetQoute = () => {
         setQouted(true);
+
         setTokenOutAmount(10000);
     }
 
@@ -69,11 +98,11 @@ const Swap = () => {
             <div className='swap-main'>
                 <div className='swap-wrapper'>
                     <form onSubmit={handleOnSubmitForm}>
-                        `<div className='swap-tokein'>
+                        <div className='swap-tokein'>
                             <input className='tokein-amount' type='number' value={tokenInAmount} onChange={handleOnChangeTokenInAmount}/>
                             <select onChange={handleOnChangeTokenIn}>
                                 {tokens.map((token) => (
-                                    <option key={token.token} value={token.token}>{token.tokenName}</option>
+                                    <option key={token.id} value={token.token}>{token.symbol}</option>
                                 ))}
                             </select>
                         </div>
@@ -81,7 +110,7 @@ const Swap = () => {
                             <input className='tokeout-amount' type='number' value={tokenOutAmount} disabled={true}/>
                             <select onChange={handleOnChangeTokenOut}>
                                 {tokens.map((token) => (
-                                    <option key={token.token} value={token.token}>{token.tokenName}</option>
+                                    <option key={token.id} value={token.token}>{token.symbol}</option>
                                 ))}
                             </select>
                         </div>
