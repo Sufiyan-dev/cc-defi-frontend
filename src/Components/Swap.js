@@ -34,9 +34,9 @@ const Swap = () => {
     useEffect(() => {
         const getQuote = async () => {
             const result = await axios.post(`http://localhost:4000/transaction/get-quote`,{
-                    "tokenIn": "0xddbc53b118098e3be3f701d243b7602673005d87",
-                    "tokenOut": "0xdb8556680c1a3b66124cf5c87bd9e61804f1e367",
-                    "amount": 50000
+                    "tokenIn": tokenIn,
+                    "tokenOut": tokenOut,
+                    "amount": tokenInAmount
             });
             console.log("result quote ", result)
         }
