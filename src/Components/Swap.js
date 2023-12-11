@@ -1,5 +1,6 @@
-import React, { useState } from "react";
-import "./Swap.css";
+import React, { useEffect, useState } from 'react'
+import "./Swap.css"
+import axios from 'axios';
 
 const tokenSample = [
   { token: "0xbkbkjbjkjk", tokenName: "ETH", tokenBalance: 10 ** 18 },
@@ -8,29 +9,59 @@ const tokenSample = [
 ];
 
 const Swap = () => {
-  const [tokens, setTokens] = useState(tokenSample);
-  const [tokenIn, setTokenIn] = useState(tokenSample[0].token);
-  const [tokenInAmount, setTokenInAmount] = useState(0);
-  const [tokenOut, setTokenOut] = useState(tokenSample[0].token);
-  const [tokenOutAmount, setTokenOutAmount] = useState(0);
-  const [qouted, setQouted] = useState(false);
-  const [slippage, setSlippage] = useState(0.3);
+    const [tokens, setTokens] = useState([]);
+    const [tokenIn, setTokenIn] = useState("");
+    const [tokenInAmount, setTokenInAmount] = useState(0);
+    const [tokenOut, setTokenOut] = useState("");
+    const [tokenOutAmount, setTokenOutAmount] = useState(0);
+    const [qouted, setQouted] = useState(false);
+    const [slippage, setSlippage] = useState(0.3);
 
-  const handleOnSubmitForm = (e) => {
-    e.preventDefault();
-    if (tokenIn === tokenOut) {
-      return alert("Cannot swap same tokens !");
+    useEffect(() => {
+        const fetchtokens = async () => {
+            const result = await axios.post(`http://localhost:4000/token/tokenInfo`);
+            console.log("result ",result)
+
+            if(!result.data){
+                return alert("falied to fetch tokens info")
+            }
+
+            setTokens(result.data.result.tokenPools)
+        }
+        fetchtokens()
+    },[])
+
+    useEffect(() => {
+        
+        const getQuote = async () => {
+          if(qouted){
+            const result = await axios.post(`http://localhost:4000/transaction/get-quote`,{
+                    "tokenIn": tokenIn,
+                    "tokenOut": tokenOut,
+                    "amount": tokenInAmount
+            });
+            console.log("result quote ", result)
+          }
+        }
+
+        getQuote()
+    },[qouted])
+
+    const handleOnSubmitForm = (e) => {
+        e.preventDefault();
+        if(tokenIn === tokenOut){
+            return alert("Cannot swap same tokens !")
+        }
+        if(qouted) {
+            // swap logic
+            console.log("swapppp")
+        } else {
+            // qoute 
+            handleGetQoute();
+        }
+        console.log(tokenIn, tokenInAmount);
+        console.log(tokenOut, tokenOutAmount);
     }
-    if (qouted) {
-      // swap logic
-      console.log("swapppp");
-    } else {
-      // qoute
-      handleGetQoute();
-    }
-    console.log(tokenIn, tokenInAmount);
-    console.log(tokenOut, tokenOutAmount);
-  };
 
   const handleGetQoute = () => {
     setQouted(true);
@@ -79,8 +110,8 @@ const Swap = () => {
               />
               <select onChange={handleOnChangeTokenIn}>
                 {tokens.map((token) => (
-                  <option key={token.token} value={token.token}>
-                    {token.tokenName}
+                  <option key={token.id} value={token.token}>
+                    {token.symbol}
                   </option>
                 ))}
               </select>
@@ -94,8 +125,8 @@ const Swap = () => {
               />
               <select onChange={handleOnChangeTokenOut}>
                 {tokens.map((token) => (
-                  <option key={token.token} value={token.token}>
-                    {token.tokenName}
+                  <option key={token.id} value={token.token}>
+                    {token.symbol}
                   </option>
                 ))}
               </select>
@@ -116,7 +147,8 @@ const Swap = () => {
         </div>
       </div>
     </div>
-  );
-};
+  )
+
+};  
 
 export default Swap;
