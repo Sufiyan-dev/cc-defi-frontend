@@ -1,12 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import "./Swap.css"
 import axios from 'axios';
-
-const tokenSample = [
-  { token: "0xbkbkjbjkjk", tokenName: "ETH", tokenBalance: 10 ** 18 },
-  { token: "0xbkbkjbdfsdjkjk", tokenName: "WETH", tokenBalance: 10 ** 18 },
-  { token: "0xbkbkjbjfsdffkjk", tokenName: "WBTC", tokenBalance: 10 ** 18 },
-];
+import { waitForTransactionConfirmation } from '../Utils/waitForTxn';
 
 const Swap = ({connectedAccount}) => {
     const [tokens, setTokens] = useState([]);
@@ -15,8 +10,10 @@ const Swap = ({connectedAccount}) => {
     const [tokenOut, setTokenOut] = useState("");
     const [tokenOutAmount, setTokenOutAmount] = useState(0);
     const [qouted, setQouted] = useState(false);
+    const [swap, setSwap] = useState(false);
     const [slippage, setSlippage] = useState(0.3);
-    console.log(connectedAccount)
+    const [userTokenInAmountBalance, setUserTokenInAmountBalance] = useState(0);
+    // console.log(connectedAccount)
 
 
     useEffect(() => {
@@ -57,17 +54,73 @@ const Swap = ({connectedAccount}) => {
 
     useEffect(() => {
       const userBalance = async () => {
+        console.log(tokenIn, connectedAccount)
         if(connectedAccount.length > 0){   
-          const result = await axios.get(`http://localhost:4000/wallet/get-balance/${connectedAccount}/${tokenIn}`);
+          const result = await axios.get(`https://defi-openswap-backend.vercel.app/wallet/get-balance/${connectedAccount}/${tokenIn}`);
           console.log("result amunt ", result)
+          setUserTokenInAmountBalance(Number(result.data.balance))
         }
       }
       userBalance()
-    },[tokenIn])
+    },[tokenIn,connectedAccount])
 
     useEffect(() => {
+      const performSwap = async () => {
+        if(swap){
+          const approveTxn = await axios.post(`https://defi-openswap-backend.vercel.app/transaction/approve`,{
+            "contractAddress": tokenIn,
+            "address": connectedAccount,
+            "amount": tokenInAmount
+          });
 
-    },[])
+          console.log("approve", approveTxn);
+
+          if(approveTxn.data){
+            try {
+              const result = await window.ethereum.request({ method: 'eth_sendTransaction', params: [approveTxn.data] });
+              console.log("result of metamsk ", result);
+
+              
+              const waitTxn = await waitForTransactionConfirmation(result);
+              console.log(waitTxn);
+
+              // if()
+            } catch(err) {
+              console.log("metmask err singing approve ", err.message)
+              return;
+            }
+
+            console.log(connectedAccount, tokenIn, tokenInAmount)
+
+            const addLiquidty = await axios.post(`https://defi-openswap-backend.vercel.app/transaction/swap`,{
+              "userAddress": connectedAccount,
+              "tokenIn": tokenIn,
+              "tokenOut": tokenOut,
+              "amountIn": tokenInAmount,
+              "amountOutMin": 0
+            });
+
+            console.log("add liquodty txn", addLiquidty.data);
+
+            try {
+              const result = await window.ethereum.request({ method: 'eth_sendTransaction', params: [addLiquidty.data]});
+              console.log("metamask add liquidty result ", result);
+
+              const waitTxn = await waitForTransactionConfirmation(result);
+              console.log(waitTxn);
+
+
+            } catch(err) {
+              console.log("metamask err signing swap ");
+              return;
+            }
+
+          }
+          setSwap(false)
+        }
+      }
+      performSwap()
+    },[swap])
 
     const handleOnSubmitForm = (e) => {
         e.preventDefault();
@@ -77,6 +130,7 @@ const Swap = ({connectedAccount}) => {
         if(qouted) {
             // swap logic
             console.log("swapppp")
+            setSwap(true);
         } else {
             // qoute 
             handleGetQoute();
@@ -127,6 +181,8 @@ const Swap = ({connectedAccount}) => {
             <div className="swap-tokein">
               <input
                 className="tokein-amount"
+                min={0}
+                max={userTokenInAmountBalance}
                 type="number"
                 value={tokenInAmount}
                 onChange={handleOnChangeTokenInAmount}
@@ -141,6 +197,7 @@ const Swap = ({connectedAccount}) => {
             </div>
             <div className="swap-tokeout">
               <input
+                min={0}
                 className="tokeout-amount"
                 type="number"
                 value={tokenOutAmount}
@@ -157,6 +214,7 @@ const Swap = ({connectedAccount}) => {
             <div className="swap-slippage-wrapper">
               <h3>Max. slippage</h3>
               <input
+                min={0.3}
                 className="swap-slippage-input"
                 type="number"
                 value={slippage}
