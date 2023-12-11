@@ -5,6 +5,7 @@ import Web3 from "web3";
 import { waitForTransactionConfirmation } from "../Utils/waitForTxn";
 
 const BuyBack = ({ connectedAccount }) => {
+  const openswap = "0x1bcf8D19a948Fb853fd8fce84a962C3DAd9c1A5C"
   const [selectedToken, setSelectedToken] = useState();
   const [selectedTokenBalance, setSelectedTokenBalance] = useState();
   const [qouted, setQouted] = useState(0);
@@ -55,7 +56,7 @@ const BuyBack = ({ connectedAccount }) => {
     const userBalance = async () => {
       if (connectedAccount) {
         const result = await axios.get(
-          `https://defi-openswap-backend.vercel.app/wallet/get-balance/${connectedAccount}/${selectedToken}`
+          `https://defi-openswap-backend.vercel.app/wallet/get-balance/${openswap}/${selectedToken}`
         );
         setSelectedTokenBalance(result.data.balance);
       }
@@ -133,13 +134,13 @@ const BuyBack = ({ connectedAccount }) => {
               ))}
             </select>
             Available Selected Token's Balance{" "}
-            {parseInt(selectedTokenBalance).toFixed(2)} <br></br>
+            {parseInt(selectedTokenBalance).toFixed(5)} <br></br>
             <br></br>
             Available OpenSwap Tokens for exchange{" "}
-            {parseInt(protocoToken).toFixed(2)}
+            {parseInt(protocoToken).toFixed(5)}
             <br></br>
             <br></br>
-            You will receive {parseInt(tokenOutAmount).toFixed(2)}
+            You will receive {parseInt(tokenOutAmount).toFixed(5)}
             <button className="buyback-btn" type="submit">
               {qouted === 0 && "Quote"}
               {qouted === 1 && "Approve"}
