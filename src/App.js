@@ -8,7 +8,7 @@ import AddLiquidity from './Components/AddLiquidity';
 import BuyBack from './Components/BuyBack';
 
 function App() {
-  const [connectedAccount, setConnectedAccount] = useState(null);
+  const [connectedAccount, setConnectedAccount] = useState("");
   const [accountBalance, setAccountBalance] = useState(0);
 
   useEffect(() => {
@@ -83,10 +83,10 @@ function App() {
           </div>
         </nav>
         <Routes>
-          <Route path="/" element={<Swap />} />
+          <Route path="/" element={<Swap connectedAccount={connectedAccount}/>} />
           {/* <Route path="/History" element={<History />} /> */}
-          <Route path="/Addliquidty" element={<AddLiquidity />} />
-          <Route path="/buyBack" element={<BuyBack />} />
+          <Route path="/Addliquidty" element={<AddLiquidity connectedAccount={connectedAccount}/>} />
+          <Route path="/buyBack" element={<BuyBack connectedAccount={connectedAccount}/>} />
         </Routes>
       </Router>
     </div>
