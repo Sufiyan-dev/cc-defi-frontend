@@ -1,11 +1,17 @@
-import { useEffect, useState } from 'react';
-import './App.css';
-import Swap from './Components/Swap';
-import History from './Components/History';
-import { BrowserRouter as Router, Routes, Route, Link, useMatch } from 'react-router-dom';
+import { useEffect, useState } from "react";
+import "./App.css";
+import Swap from "./Components/Swap";
+import History from "./Components/History";
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  Link,
+  useMatch,
+} from "react-router-dom";
 import Web3 from "web3";
-import AddLiquidity from './Components/AddLiquidity';
-import BuyBack from './Components/BuyBack';
+import AddLiquidity from "./Components/AddLiquidity";
+import BuyBack from "./Components/BuyBack";
 
 function App() {
   const [connectedAccount, setConnectedAccount] = useState(null);
@@ -13,20 +19,20 @@ function App() {
 
   useEffect(() => {
     if (window.ethereum) {
-      window.ethereum.on('chainChanged', () => {
+      window.ethereum.on("chainChanged", () => {
         window.location.reload();
-      })
-      window.ethereum.on('accountsChanged', () => {
+      });
+      window.ethereum.on("accountsChanged", () => {
         window.location.reload();
-      })
+      });
     }
   });
 
-  function NavLink({to, children}) {
+  function NavLink({ to, children }) {
     let match = useMatch(to);
     return (
       <li>
-        <Link to={to} className={match ? 'active-tab' : ''}>
+        <Link to={to} className={match ? "active-tab" : ""}>
           {children}
         </Link>
       </li>
@@ -48,7 +54,7 @@ function App() {
 
       // Get the account balance
       const balance = await web3.eth.getBalance(connectedAddress);
-      const balanceInWei = web3.utils.fromWei(balance, "ether")
+      const balanceInWei = web3.utils.fromWei(balance, "ether");
       setAccountBalance(Number(balanceInWei).toFixed(2));
     } catch (error) {
       console.error("Error connecting to MetaMask:", error);
@@ -57,36 +63,64 @@ function App() {
 
   const handleDisconnectWallet = () => {
     setConnectedAccount(null);
-    setAccountBalance(null)
-  }
+    setAccountBalance(null);
+  };
 
   return (
     <div className="App">
       <Router>
-        <nav className='navbar-main'>
-          <div className='navbar-name'><h1>OpenSwap</h1></div>
-          <div className='navbar-navigation-wrapper'>
-            <ul className='nav-bar'>
+        <nav className="navbar-main">
+          <div className="navbar-name">
+            <h1>OpenSwap</h1>
+          </div>
+          <div className="navbar-navigation-wrapper">
+            <ul className="nav-bar">
               <NavLink to="/">Swap</NavLink>
               {/* <NavLink to="/History">History</NavLink> */}
               <NavLink to="/Addliquidty">Add Liquidity</NavLink>
               <NavLink to="/buyBack">Buy Back</NavLink>
             </ul>
           </div>
-          <div className='navbar-connect'>
-            {
-              connectedAccount ? <button className='disoconnect-btn' onClick={handleDisconnectWallet}><div className='navbar-userinfo'>
-                <div className='address'>{connectedAccount.substring(0,5)+"..."+connectedAccount.substring(connectedAccount.length-5,connectedAccount.length)}</div>
-                <div>/</div><div className='balance'>{accountBalance}</div>
-              </div></button> : <button className="connect-btn" onClick={handleConnectWallet}>Connect</button>
-            }
+          <div className="navbar-connect">
+            {connectedAccount ? (
+              <button
+                className="disoconnect-btn"
+                onClick={handleDisconnectWallet}
+              >
+                <div className="navbar-userinfo">
+                  <div className="address">
+                    {connectedAccount.substring(0, 5) +
+                      "..." +
+                      connectedAccount.substring(
+                        connectedAccount.length - 5,
+                        connectedAccount.length
+                      )}
+                  </div>
+                  <div>/</div>
+                  <div className="balance">{accountBalance}</div>
+                </div>
+              </button>
+            ) : (
+              <button className="connect-btn" onClick={handleConnectWallet}>
+                Connect
+              </button>
+            )}
           </div>
         </nav>
         <Routes>
-          <Route path="/" element={<Swap />} />
+          <Route
+            path="/"
+            element={<Swap connectedAccount={connectedAccount} />}
+          />
           {/* <Route path="/History" element={<History />} /> */}
-          <Route path="/Addliquidty" element={<AddLiquidity />} />
-          <Route path="/buyBack" element={<BuyBack />} />
+          <Route
+            path="/Addliquidty"
+            element={<AddLiquidity connectedAccount={connectedAccount} />}
+          />
+          <Route
+            path="/buyBack"
+            element={<BuyBack connectedAccount={connectedAccount} />}
+          />
         </Routes>
       </Router>
     </div>

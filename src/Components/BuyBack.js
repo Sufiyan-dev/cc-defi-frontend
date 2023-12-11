@@ -1,36 +1,63 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from "react";
 import "./BuyBack.css";
-
-const tokenSample = [
-  { token: "0xbkbkjbjkjk", tokenName: "ETH", tokenBalance: 10 ** 18 },
-  { token: "0xbkbkjbdfsdjkjk", tokenName: "ETH", tokenBalance: 10 ** 18 },
-  { token: "0xbkbkjbjfsdffkjk", tokenName: "ETH", tokenBalance: 10 ** 18 },
-];
-
-const BuyBack = () => {
-  const [reserves, setReserves] = useState(tokenSample);
-  const [selectedToken, setSelectedToken] = useState(tokenSample[0].token);
+import axios from "axios";
+const BuyBack = ({ connectedAccount }) => {
+  const [selectedToken, setSelectedToken] = useState();
   const [qouted, setQouted] = useState(false);
   const [error, setError] = useState("");
-
+  const [tokens, setTokens] = useState([]);
+  const [protocoToken, setProtocolToken] = useState(0.0);
   const handleOnSubmit = (e) => {
     e.preventDefault();
     console.log(selectedToken);
   };
 
+  const handleOnChange = (e) => {
+    setSelectedToken(e.target.value);
+  };
+
+  useEffect(() => {
+    const fetchtokens = async () => {
+      const result = await axios.post(
+        `https://defi-openswap-backend.vercel.app/token/tokenInfo`
+      );
+      console.log("result ", result);
+
+      if (!result.data) {
+        return alert("falied to fetch tokens info");
+      }
+
+      setTokens(result.data.result.tokenPools);
+      setSelectedToken(result.data.result.tokenPools[0].id);
+    };
+    const protocolBalance = async () => {
+      const result = await axios.get(
+        `https://defi-openswap-backend.vercel.app/wallet/get-balance/${connectedAccount}/0x39A4269650B394159Ac6147e48A88f5345316FB1`
+      );
+      setProtocolToken(result.data.balance);
+    };
+    fetchtokens();
+    protocolBalance();
+  }, []);
+
   return (
-    <div className='buyback-main'>
-      <div className='buyback-wrapper'>
-        <div className='buyback-title'>Buy Back</div>
-        <div className='buyback-error'>{error.length > 0 ? error : ""}</div>
+    <div className="buyback-main">
+      <div className="buyback-wrapper">
+        <div className="buyback-title">Buy Back</div>
+        <div className="buyback-error">{error.length > 0 ? error : ""}</div>
         <form onSubmit={handleOnSubmit}>
-          <div className='buyback-dropdown'>
-            <select onChange={(e) => setSelectedToken(e.target.value)}>
-              {reserves.length > 0 ? reserves.map((reserve) => (
-                <option value={reserve.token} key={reserve.token}>{reserve.tokenName}</option>
-              )) : <div></div>}
+          <div className="buyback-dropdown">
+            <select onChange={handleOnChange}>
+              {tokens.map((token) => (
+                <option key={token.id} value={token.token}>
+                  {token.symbol}
+                </option>
+              ))}
             </select>
-            <button className="buyback-btn" type='submit'>{qouted ? "Buy" : "Quote"}</button>
+            Available OpenSwap Tokens for exchange {protocoToken}
+            <button className="buyback-btn" type="submit">
+              {qouted ? "Buy" : "Quote"}
+            </button>
           </div>
         </form>
       </div>
