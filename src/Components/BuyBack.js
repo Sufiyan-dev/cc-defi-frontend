@@ -5,9 +5,9 @@ import Web3 from "web3";
 import { waitForTransactionConfirmation } from "../Utils/waitForTxn";
 
 const BuyBack = ({ connectedAccount }) => {
-  const openswap = "0x1bcf8D19a948Fb853fd8fce84a962C3DAd9c1A5C"
-  const [selectedToken, setSelectedToken] = useState();
-  const [selectedTokenBalance, setSelectedTokenBalance] = useState();
+  const openswap = `${process.env.REACT_APP_DEX_ADDRESS}`
+  const [selectedToken, setSelectedToken] = useState("");
+  const [selectedTokenBalance, setSelectedTokenBalance] = useState("");
   const [qouted, setQouted] = useState(0);
   const [tokenOutAmount, setTokenOutAmount] = useState(0);
 
@@ -21,10 +21,10 @@ const BuyBack = ({ connectedAccount }) => {
 
   const getTransactionObject = async () => {
     const result = await axios.post(
-      `https://defi-openswap-backend.vercel.app/transaction/approve`,
+      `${process.env.REACT_APP_BACKEND_URL}/transaction/approve`,
       {
         address: connectedAccount,
-        contractAddress: "0x39A4269650B394159Ac6147e48A88f5345316FB1",
+        contractAddress: `${process.env.REACT_APP_TOKEN_ADDRESS}`,
         amount: protocoToken,
       }
     );
@@ -39,9 +39,9 @@ const BuyBack = ({ connectedAccount }) => {
 
   const getQuote = async () => {
     const result = await axios.post(
-      `https://defi-openswap-backend.vercel.app/transaction/get-quote`,
+      `${process.env.REACT_APP_BACKEND_URL}/transaction/get-quote`,
       {
-        tokenIn: "0x39A4269650B394159Ac6147e48A88f5345316FB1",
+        tokenIn: `${process.env.REACT_APP_TOKEN_ADDRESS}`,
         tokenOut: selectedToken,
         amount: protocoToken,
       }
@@ -56,7 +56,7 @@ const BuyBack = ({ connectedAccount }) => {
     const userBalance = async () => {
       if (connectedAccount) {
         const result = await axios.get(
-          `https://defi-openswap-backend.vercel.app/wallet/get-balance/${openswap}/${selectedToken}`
+          `${process.env.REACT_APP_BACKEND_URL}/wallet/get-balance/${openswap}/${selectedToken}`
         );
         setSelectedTokenBalance(result.data.balance);
       }
@@ -70,7 +70,7 @@ const BuyBack = ({ connectedAccount }) => {
   useEffect(() => {
     const fetchtokens = async () => {
       const result = await axios.post(
-        `https://defi-openswap-backend.vercel.app/token/tokenInfo`
+        `${process.env.REACT_APP_BACKEND_URL}/token/tokenInfo`
       );
       console.log("result ", result);
 
@@ -83,8 +83,9 @@ const BuyBack = ({ connectedAccount }) => {
     };
     const protocolBalance = async () => {
       const result = await axios.get(
-        `https://defi-openswap-backend.vercel.app/wallet/get-balance/${connectedAccount}/0x39A4269650B394159Ac6147e48A88f5345316FB1`
+        `${process.env.REACT_APP_BACKEND_URL}/wallet/get-balance/${connectedAccount}/0x39A4269650B394159Ac6147e48A88f5345316FB1`
       );
+      console.log("user protocla tokens ", result)
       setProtocolToken(result.data.balance);
     };
     fetchtokens();
@@ -92,7 +93,7 @@ const BuyBack = ({ connectedAccount }) => {
   }, []);
   const buyBackNow = async () => {
     const result = await axios.post(
-      `https://defi-openswap-backend.vercel.app/transaction/buyback`,
+      `${process.env.REACT_APP_BACKEND_URL}/transaction/buyback`,
       {
         tokenAddress: selectedToken,
         amountMin: 0,

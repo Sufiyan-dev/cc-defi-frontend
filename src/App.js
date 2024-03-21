@@ -13,6 +13,8 @@ import Web3 from "web3";
 import AddLiquidity from "./Components/AddLiquidity";
 import BuyBack from "./Components/BuyBack";
 
+console.log("env ", process.env.REACT_APP_TEST)
+
 function App() {
   const [connectedAccount, setConnectedAccount] = useState("");
   const [accountBalance, setAccountBalance] = useState(0);
