@@ -18,7 +18,7 @@ const Swap = ({connectedAccount}) => {
 
     useEffect(() => {
         const fetchtokens = async () => {
-            const result = await axios.post(`https://defi-openswap-backend.vercel.app/token/tokenInfo`);
+            const result = await axios.post(`${process.env.REACT_APP_BACKEND_URL}/token/tokenInfo`);
             console.log("result ",result)
 
             if(!result.data){
@@ -37,7 +37,7 @@ const Swap = ({connectedAccount}) => {
         const getQuote = async () => {
           console.log(tokenIn, tokenOut, tokenInAmount)
           if(qouted){
-            const result = await axios.post(`https://defi-openswap-backend.vercel.app/transaction/get-quote`,{
+            const result = await axios.post(`${process.env.REACT_APP_BACKEND_URL}/transaction/get-quote`,{
                     "tokenIn": tokenIn,
                     "tokenOut": tokenOut,
                     "amount": tokenInAmount
@@ -56,7 +56,7 @@ const Swap = ({connectedAccount}) => {
       const userBalance = async () => {
         console.log(tokenIn, connectedAccount)
         if(connectedAccount.length > 0){   
-          const result = await axios.get(`https://defi-openswap-backend.vercel.app/wallet/get-balance/${connectedAccount}/${tokenIn}`);
+          const result = await axios.get(`${process.env.REACT_APP_BACKEND_URL}/wallet/get-balance/${connectedAccount}/${tokenIn}`);
           console.log("result amunt ", result)
           setUserTokenInAmountBalance(Number(result.data.balance))
         }
@@ -67,7 +67,7 @@ const Swap = ({connectedAccount}) => {
     useEffect(() => {
       const performSwap = async () => {
         if(swap){
-          const approveTxn = await axios.post(`https://defi-openswap-backend.vercel.app/transaction/approve`,{
+          const approveTxn = await axios.post(`${process.env.REACT_APP_BACKEND_URL}/transaction/approve`,{
             "contractAddress": tokenIn,
             "address": connectedAccount,
             "amount": tokenInAmount
@@ -92,7 +92,7 @@ const Swap = ({connectedAccount}) => {
 
             console.log(connectedAccount, tokenIn, tokenInAmount)
 
-            const addLiquidty = await axios.post(`https://defi-openswap-backend.vercel.app/transaction/swap`,{
+            const addLiquidty = await axios.post(`${process.env.REACT_APP_BACKEND_URL}/transaction/swap`,{
               "userAddress": connectedAccount,
               "tokenIn": tokenIn,
               "tokenOut": tokenOut,
@@ -100,7 +100,7 @@ const Swap = ({connectedAccount}) => {
               "amountOutMin": 0
             });
 
-            console.log("add liquodty txn", addLiquidty.data);
+            console.log("add liquidity txn", addLiquidty.data);
 
             try {
               const result = await window.ethereum.request({ method: 'eth_sendTransaction', params: [addLiquidty.data]});

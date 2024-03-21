@@ -1,0 +1,40 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: openswap-frontend-deployment
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: frontend
+  template:
+    metadata:
+      labels:
+        app: frontend
+    spec:
+      containers:
+      - name: frontend
+        image: frontend-image
+        resources:
+          limits:
+            cpu: "500m" # 500 milliCPU (0.5 CPU)
+            memory: "256Mi" # 256 Mebibytes
+          requests:
+            cpu: "200m" # 200 milliCPU (0.2 CPU)
+            memory: "128Mi" # 128 Mebibytes
+      env:
+        - name: REACT_APP_BACKEND_URL
+            valueFrom:
+              secretKeyRef:
+                name: backend-secret
+                key: username
+        - name: REACT_APP_TOKEN_ADDRESS
+            valueFrom:
+              secretKeyRef:
+                name: backend-secret
+                key: password
+        - name: REACT_APP_TOKEN_ADDRESS
+            valueFrom:
+              secretKeyRef:
+                name: backend-secret
+                key: password       

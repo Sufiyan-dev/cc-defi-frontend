@@ -27,7 +27,7 @@ const AddLiquidity = ({connectedAccount}) => {
   useEffect(() => {
     const getUsersHistory = async () => {
       if(connectedAccount.length > 0){
-        const result = await axios.post(`https://defi-openswap-backend.vercel.app/token/userSupplyHistory`,{
+        const result = await axios.post(`${process.env.REACT_APP_BACKEND_URL}/token/userSupplyHistory`,{
           "userAddress": connectedAccount
         })
         console.log("history ",result);
@@ -41,7 +41,7 @@ const AddLiquidity = ({connectedAccount}) => {
 
   useEffect(() => {
       const fetchtokens = async () => {
-          const result = await axios.post(`https://defi-openswap-backend.vercel.app/token/tokenInfo`);
+          const result = await axios.post(`${process.env.REACT_APP_BACKEND_URL}/token/tokenInfo`);
           console.log("result ",result)
 
           if(!result.data){
@@ -58,7 +58,7 @@ const AddLiquidity = ({connectedAccount}) => {
   useEffect(() => {
     const performAddLiquidty = async () => {
       if(addliquidity){
-        const approveTxn = await axios.post(`https://defi-openswap-backend.vercel.app/transaction/approve`,{
+        const approveTxn = await axios.post(`${process.env.REACT_APP_BACKEND_URL}/transaction/approve`,{
             "contractAddress": tokenSelected,
             "address": connectedAccount,
             "amount": supplyAmount
@@ -81,7 +81,7 @@ const AddLiquidity = ({connectedAccount}) => {
               return;
             }
 
-            const addLiquidty = await axios.post(`https://defi-openswap-backend.vercel.app/transaction/deposit`,{
+            const addLiquidty = await axios.post(`${process.env.REACT_APP_BACKEND_URL}/transaction/deposit`,{
               "tokenAddress": tokenSelected,
               "amount": supplyAmount,
               "userAddress": connectedAccount
@@ -113,7 +113,7 @@ const AddLiquidity = ({connectedAccount}) => {
     const userBalance = async () => {
       console.log(tokenSelected, connectedAccount)
       if(connectedAccount.length > 0){   
-        const result = await axios.get(`https://defi-openswap-backend.vercel.app/wallet/get-balance/${connectedAccount}/${tokenSelected}`);
+        const result = await axios.get(`${process.env.REACT_APP_BACKEND_URL}/wallet/get-balance/${connectedAccount}/${tokenSelected}`);
         console.log("result amunt ", result)
         setUserSelectedTokenBalance(Number(result.data.balance))
       }
