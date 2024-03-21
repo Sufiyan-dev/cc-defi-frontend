@@ -23,18 +23,18 @@ spec:
             cpu: "200m" # 200 milliCPU (0.2 CPU)
             memory: "128Mi" # 128 Mebibytes
       env:
-        - name: REACT_APP_BACKEND_URL
-            valueFrom:
-              secretKeyRef:
-                name: backend-secret
-                key: username
-        - name: REACT_APP_TOKEN_ADDRESS
-            valueFrom:
-              secretKeyRef:
-                name: backend-secret
-                key: password
-        - name: REACT_APP_TOKEN_ADDRESS
-            valueFrom:
-              secretKeyRef:
-                name: backend-secret
-                key: password       
+      - name: REACT_APP_BACKEND_URL
+        valueFrom:
+          secretKeyRef:
+            name: openswap-frontend-secret
+            key: backend-url
+      - name: REACT_APP_TOKEN_ADDRESS
+        valueFrom:
+          secretKeyRef:
+            name: openswap-frontend-secret
+            key: token-address
+      - name: REACT_APP_TOKEN_ADDRESS
+        valueFrom:
+          secretKeyRef:
+            name: openswap-frontend-secret
+            key: dex-address
