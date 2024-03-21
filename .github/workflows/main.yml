@@ -1,0 +1,26 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      # Add your linting or testing steps here
+      - name: Run linting
+        run: npm run lint
+
+      # If linting and tests pass, trigger Jenkins job
+      # - name: Trigger Jenkins job
+      #   if: ${{ success() }}
+      #   run: |
+      #     curl -X POST https://your-jenkins-url.com/job/your-job-name/build \
+      #     --user username:api_token \
+      #     --data-urlencode json='{"parameter": [{"name":"param_name", "value":"param_value"}]}'
